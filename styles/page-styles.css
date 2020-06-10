@@ -71,7 +71,7 @@ body {
 }
 
 .ui-controller-control img,
-.ui-participant-img, .ui-participant-local img {
+.ui-participant-guest img, .ui-participant-local img {
   width: 24px;
   height: 24px;
 }

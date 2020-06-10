@@ -54,7 +54,8 @@
       </div>
     </div>
     <script>
-      let raisingHand;
+      let raisingHand,
+        handState = {};
 
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -68,7 +69,8 @@
 
         callFrame
           .on("joined-meeting", joinedCall)
-          .on("participant-joined", newParticipant);
+          .on("participant-joined", updateParticipantList)
+          .on("app-message", updateHandState);
         await callFrame.join({
           url: room.url,
           cssFile: "./styles/callframe-styles.css",
@@ -91,6 +93,11 @@
           document.getElementById("local-hand").style.display = "none";
           // Remove camera overlay styling
         }
+        // Send a message sharing this state with all callers
+        update = {
+          status: raisingHand,
+        };
+        callFrame.sendAppMessage(update, "*");
       }
 
       async function joinedCall(e) {
@@ -98,36 +105,52 @@
         // Remove the loading screen and display video
         document.getElementById("ui-local").style.display = "none";
         // ISSUE: CAMERA NOT DISPLAYING ON LOAD
-        // Display Leave Call option
         // Also a problem here for me: https://daily-co.github.io/daily-js/demo/demo-css-grid.html
+        // Display Leave Call option
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
         };
+        // Add raisingHand status to handState
+        raisingHand = false;
+        handState[e.participants.local.session_id] = raisingHand;
+        console.log(handState);
         // See accurate list of other participants and whether their hands are raised
       }
 
-      async function newParticipant(e) {
+      async function updateParticipantList(e) {
         console.log(e);
         // Add new participant name to the list
         let participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
+
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
-            return;
+            return; // We set the local display in the HTML
           } else {
-            // We set the local display on load in the html, so we just do everyone else here
             let participant = participants[p];
             wrapper.innerHTML += `
         <div class="ui-participant-guest">
             <p>${participant.user_name || "Guest"}</p>
             <img id=${
               participant.session_id
-            } src="../shared-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
+            } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
+          
+          if (handState[participant.session_id] === true) {
+            document.getElementById(`${participant.session_id}`).style.display =
+              "block";
           }
-        });
+        }});
+      }
+
+      async function updateHandState(e) {
+        console.log(e);
+        let id = e.fromId;
+        let status = e.data.status;
+        handState[id] = status;
+        updateParticipantList(); 
       }
     </script>
   </body>
