@@ -37,6 +37,8 @@
             <p id="leave-call-label" style="color: #ff3b30;"></p>
             <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
         </div>
+    </div>
+        
         <div id="ui-participant">
             <p>Participants</p>
             <div class="ui-participant-local">
@@ -49,7 +51,7 @@
               />
               <div id="ui-participant-guests"></div>
             </div>
-          </div>
+        </div>
     </div>
     <script>
     let raisingHand; 
@@ -92,8 +94,9 @@
           console.log(e); 
           // Remove the loading screen and display video 
           document.getElementById("ui-local").style.display = "none";
-          callFrame.setLocalVideo(!callFrame.localVideo()); 
+          // ISSUE: CAMERA NOT DISPLAYING ON LOAD 
           // Display Leave Call option 
+          // Also a problem here for me: https://daily-co.github.io/daily-js/demo/demo-css-grid.html
           document.getElementById("leave-call-label").innerHTML = "Leave call";
           document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
