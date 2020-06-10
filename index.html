@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Video call</title>
+    <script src="https://unpkg.com/@daily-co/daily-js"></script>
+  </head>
+  <body onload="startCall()">
+    <h1>Hello, World!</h1>
+    <iframe id="call-frame" allow="camera; microphone; autoplay"></iframe>
+    <script>
+      async function startCall() {
+        // For demo purposes, I'm hard-coding the meeting room.
+        // This is NOT a best practice in production. For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
+        room = { url: "https://kimberlee.daily.co/hello" };
+
+        callFrame = window.DailyIframe.wrap(
+          document.getElementById("call-frame"),
+          { customLayout: true }
+        );
+
+        // Placeholder for callFrame events 
+
+        await callFrame.join({
+          url: room.url,
+        });
+      }
+    </script>
+  </body>
+</html>

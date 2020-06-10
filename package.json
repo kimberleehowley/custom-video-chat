@@ -1,0 +1,14 @@
+{
+  "main": "index.js",
+  "scripts": {
+    "start": "micro -l tcp://0.0.0.0:3001",
+    "dev": "micro-dev -p 3001"
+  },
+  "devDependencies": {
+    "micro-dev": "^3.0.0"
+  },
+  "dependencies": {
+    "micro": "^9.3.4",
+    "serve-handler": "^6.1.2"
+  }
+}
