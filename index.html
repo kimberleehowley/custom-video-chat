@@ -45,8 +45,8 @@ http://localhost:49831/custom-video-call/index.html
               <em>You</em>
               <img
                 id="local-hand"
-                src="../shared-assets/icon-raised-hand.png"
-                alt="Raised hand"
+                src="./icon-assets/icon-raised-hand.png"
+                alt="Hand icon"
                 style="display: none;"
               />
               <div id="ui-participant-guests"></div>
@@ -54,6 +54,8 @@ http://localhost:49831/custom-video-call/index.html
           </div>
     </div>
     <script>
+    let raisingHand; 
+
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
         // This is NOT a best practice in production. For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
@@ -70,6 +72,22 @@ http://localhost:49831/custom-video-call/index.html
           url: room.url,
           cssFile: "./styles/callframe-styles.css",
         });
+      }
+
+      // User raises or lowers their own hand 
+      // Will also need to send a message sharing this state with all callers
+      // That state will also need to be stored, and accurately displayed when new callers join 
+      async function toggleHand() {
+        if (!raisingHand) {
+            raisingHand = true; 
+            // Change the user's display 
+            document.getElementById("handraise-label").innerHTML = "Lower hand";
+            document.getElementById("local-hand").style.display = "block";
+        } else {
+            raisingHand = false; 
+            document.getElementById("handraise-label").innerHTML = "Raise hand";
+            document.getElementById("local-hand").style.display = "none";
+        }
       }
     </script>
   </body>
