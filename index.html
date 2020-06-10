@@ -19,42 +19,42 @@
           <img src="./icon-assets/icon-camera.svg" alt="Toggle Camera On/Off" />
         </div>
         <div
-            onclick="callFrame.setLocalAudio(!callFrame.localAudio())"
-            class="ui-controller-control"
+          onclick="callFrame.setLocalAudio(!callFrame.localAudio())"
+          class="ui-controller-control"
         >
-            <p>Toggle microphone</p>
-            <img
+          <p>Toggle microphone</p>
+          <img
             src="./icon-assets/icon-microphone.svg"
             alt="Toggle Microphone On/Off"
-            />
+          />
         </div>
         <div onclick="toggleHand()" class="ui-controller-control">
-            <p id="handraise-label">Raise hand</p>
-            <img src="./icon-assets/icon-raised-hand.png" alt="Hand icon" />
+          <p id="handraise-label">Raise hand</p>
+          <img src="./icon-assets/icon-raised-hand.png" alt="Hand icon" />
         </div>
         <hr />
         <div id="leave-call-div" class="ui-controller-control">
-            <p id="leave-call-label" style="color: #ff3b30;"></p>
-            <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
+          <p id="leave-call-label" style="color: #ff3b30;"></p>
+          <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
         </div>
-    </div>
-        
-        <div id="ui-participant">
-            <p>Participants</p>
-            <div class="ui-participant-local">
-              <em>You</em>
-              <img
-                id="local-hand"
-                src="./icon-assets/icon-raised-hand.png"
-                alt="Hand icon"
-                style="display: none;"
-              />
-              <div id="ui-participant-guests"></div>
-            </div>
+      </div>
+
+      <div id="ui-participant">
+        <p>Participants</p>
+        <div class="ui-participant-local">
+          <em>You</em>
+          <img
+            id="local-hand"
+            src="./icon-assets/icon-raised-hand.png"
+            alt="Hand icon"
+            style="display: none;"
+          />
         </div>
+        <div id="ui-participant-guests"></div>
+      </div>
     </div>
     <script>
-    let raisingHand; 
+      let raisingHand;
 
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -67,41 +67,67 @@
         );
 
         callFrame
-            .on("joined-meeting", joinedCall);
+          .on("joined-meeting", joinedCall)
+          .on("participant-joined", newParticipant);
         await callFrame.join({
           url: room.url,
           cssFile: "./styles/callframe-styles.css",
         });
       }
 
-      // User raises or lowers their own hand 
+      // User raises or lowers their own hand
       // Will also need to send a message sharing this state with all callers
-      // That state will also need to be stored, and accurately displayed when new callers join 
+      // That state will also need to be stored, and accurately displayed when new callers join
       async function toggleHand() {
         if (!raisingHand) {
-            raisingHand = true; 
-            // Change the user's display 
-            document.getElementById("handraise-label").innerHTML = "Lower hand";
-            document.getElementById("local-hand").style.display = "block";
+          raisingHand = true;
+          // Change the user's display
+          document.getElementById("handraise-label").innerHTML = "Lower hand";
+          document.getElementById("local-hand").style.display = "block";
+          // Update styling to a camera overlay
         } else {
-            raisingHand = false; 
-            document.getElementById("handraise-label").innerHTML = "Raise hand";
-            document.getElementById("local-hand").style.display = "none";
+          raisingHand = false;
+          document.getElementById("handraise-label").innerHTML = "Raise hand";
+          document.getElementById("local-hand").style.display = "none";
+          // Remove camera overlay styling
         }
       }
 
       async function joinedCall(e) {
-          console.log(e); 
-          // Remove the loading screen and display video 
-          document.getElementById("ui-local").style.display = "none";
-          // ISSUE: CAMERA NOT DISPLAYING ON LOAD 
-          // Display Leave Call option 
-          // Also a problem here for me: https://daily-co.github.io/daily-js/demo/demo-css-grid.html
-          document.getElementById("leave-call-label").innerHTML = "Leave call";
-          document.getElementById("leave-call-div").onclick = () => {
+        console.log(e);
+        // Remove the loading screen and display video
+        document.getElementById("ui-local").style.display = "none";
+        // ISSUE: CAMERA NOT DISPLAYING ON LOAD
+        // Display Leave Call option
+        // Also a problem here for me: https://daily-co.github.io/daily-js/demo/demo-css-grid.html
+        document.getElementById("leave-call-label").innerHTML = "Leave call";
+        document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
         };
-          // See accurate list of other participants and whether their hands are raised 
+        // See accurate list of other participants and whether their hands are raised
+      }
+
+      async function newParticipant(e) {
+        console.log(e);
+        // Add new participant name to the list
+        let participants = callFrame.participants();
+        let wrapper = document.getElementById("ui-participant-guests");
+        wrapper.innerHTML = "";
+        Object.keys(participants).forEach((p) => {
+          if (p === "local") {
+            return;
+          } else {
+            // We set the local display on load in the html, so we just do everyone else here
+            let participant = participants[p];
+            wrapper.innerHTML += `
+        <div class="ui-participant-guest">
+            <p>${participant.user_name || "Guest"}</p>
+            <img id=${
+              participant.session_id
+            } src="../shared-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
+        </div>`;
+          }
+        });
       }
     </script>
   </body>
