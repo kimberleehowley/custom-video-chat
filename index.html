@@ -1,11 +1,58 @@
+http://localhost:49831/custom-video-call/index.html
 <html>
   <head>
     <title>Video call</title>
     <script src="https://unpkg.com/@daily-co/daily-js"></script>
+    <link rel="stylesheet" href="styles/page-styles.css" />
   </head>
   <body onload="startCall()">
-    <h1>Hello, World!</h1>
     <iframe id="call-frame" allow="camera; microphone; autoplay"></iframe>
+    <div id="ui-container">
+      <div id="ui-local">
+        <p>Loading your video feed…</p>
+      </div>
+      <div id="ui-alone"></div>
+      <div id="ui-controller">
+        <div
+          onclick="callFrame.setLocalVideo(!callFrame.localVideo())"
+          class="ui-controller-control"
+        >
+          <p>Toggle camera</p>
+          <img src="./icon-assets/icon-camera.svg" alt="Toggle Camera On/Off" />
+        </div>
+        <div
+            onclick="callFrame.setLocalAudio(!callFrame.localAudio())"
+            class="ui-controller-control"
+        >
+            <p>Toggle microphone</p>
+            <img
+            src="./icon-assets/icon-microphone.svg"
+            alt="Toggle Microphone On/Off"
+            />
+        </div>
+        <div onclick="toggleHand()" class="ui-controller-control">
+            <p id="handraise-label">Raise hand</p>
+            <img src="./icon-assets/icon-raised-hand.png" alt="Hand icon" />
+        </div>
+        <hr />
+        <div id="leave-call-div" class="ui-controller-control">
+            <p id="leave-call-label" style="color: #ff3b30;"></p>
+            <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
+        </div>
+        <div id="ui-participant">
+            <p>Participants</p>
+            <div class="ui-participant-local">
+              <em>You</em>
+              <img
+                id="local-hand"
+                src="../shared-assets/icon-raised-hand.png"
+                alt="Raised hand"
+                style="display: none;"
+              />
+              <div id="ui-participant-guests"></div>
+            </div>
+          </div>
+    </div>
     <script>
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -17,11 +64,11 @@
           { customLayout: true }
         );
 
-        // Placeholder for callFrame events 
+        // Placeholder for callFrame events
 
         await callFrame.join({
           url: room.url,
-          cssFile: "./styles/callframe-styles.css"
+          cssFile: "./styles/callframe-styles.css",
         });
       }
     </script>
