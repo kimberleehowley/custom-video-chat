@@ -16,5 +16,5 @@ If you're looking for more complete step-by-step instructions, you can find them
 
 With that, you should be up and running! Enjoy playing around with the [Daily.co API](https://docs.daily.co/reference) (the `.addFakeParticipant()` method is my favorite). 
 
-## Feedback 
+## Contributing and feedback 
 Please send any feedback, questions or general thoughts to `hello@kimberlee.dev`. 
