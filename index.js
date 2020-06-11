@@ -1,5 +1,5 @@
 /**
- * Handles request and response routing 
+ * Handles request and response routing
  */
 const handler = require("serve-handler");
 
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
       "package.json",
       "package-lock.json",
       "doc-site-assets",
-      "node_modules"
-    ]
+      "node_modules",
+    ],
   });
 };

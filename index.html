@@ -58,6 +58,10 @@
 
       let handState = {};
 
+      /**
+       *  Initializes a Daily.co call and creates the iframe
+       *
+       */
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
         // This is NOT a best practice in production. For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
@@ -80,6 +84,10 @@
         });
       }
 
+      /**
+       *  Toggles the participant's hand status, and sends a message alerting other participants to the change
+       *
+       */
       async function toggleHand() {
         if (!raisingHand) {
           raisingHand = true;
@@ -91,32 +99,38 @@
           document.getElementById("handraise-label").innerHTML = "Raise hand";
           document.getElementById("local-hand").style.display = "none";
         }
-        // Send a message sharing this state with all callers
+        // Send a message to update all users on the change
         update = {
           status: raisingHand,
         };
         callFrame.sendAppMessage(update, "*");
       }
 
+      /**
+       *  Removes the loading screen when a participant joins a call
+       *  Toggles label display when a user joins
+       */
       async function joinedCall() {
-        // Remove the loading screen, display video 
         document.getElementById("ui-local").style.display = "none";
-        // Display the Leave Call option
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
         };
       }
 
+      /**
+       *  Updates participant list based on who is in a call and who has their hand raised
+       *  @param {Object} e is the event information Daily.co returns
+       */
       async function updateParticipantList(e) {
-        // Get all the participants on the call 
+        // Get all the participants on the call
         participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
         // Loop through participants, adding their names to the list
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
-            return; // We exit out here because "You" is already added for the local user
+            return; // "You" is already added for the local user
           }
           let participant = participants[p];
           wrapper.innerHTML += `
@@ -127,7 +141,7 @@
             } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
 
-          // For every participant on the call that is not the one who just joined or left 
+          // For every participant on the call that is not the one who just joined or left
           if (p !== e.participant.session_id) {
             // Send everyone a message about the participant's hand state
             update = {
@@ -135,11 +149,15 @@
             };
             setTimeout(() => {
               callFrame.sendAppMessage(update, "*");
-            }, 3000);
+            }, 10000);
           }
         });
       }
 
+      /**
+       *  Receives a message from other participants, updates handState and display accordingly
+       *  @param {Object} e is the event information Daily.co returns
+       */
       async function updateHandState(e) {
         let id = e.fromId;
         let status = e.data.status;
@@ -149,6 +167,11 @@
         }
       }
 
+      /**
+       *  Toggles display settings when a user leaves a call
+       * Calls updateParticipantList passing in the information about the user who left
+       *  @param {Object} e is the event information Daily.co returns
+       */
       async function leftCall(e) {
         // Display the Join Call option
         document.getElementById("leave-call-label").innerHTML = "Join call";
@@ -156,8 +179,8 @@
           callFrame.join();
         };
         // Clear the participants' list locally
-        document.getElementById("ui-participant-local").style.display = "none"; 
-        updateParticipantList(e)
+        document.getElementById("ui-participant-local").style.display = "none";
+        updateParticipantList(e);
       }
     </script>
   </body>
