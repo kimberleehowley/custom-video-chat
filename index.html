@@ -54,8 +54,10 @@
       </div>
     </div>
     <script>
-      let raisingHand,
-        handState = {};
+      let raisingHand;
+
+      // Empty JSON
+      let handState = {};
 
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -69,7 +71,7 @@
 
         callFrame
           .on("joined-meeting", joinedCall)
-          .on("participant-joined", updateParticipantList)
+          .on("participant-joined", newParticipant)
           .on("app-message", updateHandState);
         await callFrame.join({
           url: room.url,
@@ -77,9 +79,6 @@
         });
       }
 
-      // User raises or lowers their own hand
-      // Will also need to send a message sharing this state with all callers
-      // That state will also need to be stored, and accurately displayed when new callers join
       async function toggleHand() {
         if (!raisingHand) {
           raisingHand = true;
@@ -101,56 +100,60 @@
       }
 
       async function joinedCall(e) {
-        console.log(e);
+        // console.log(e);
+        // console.log(handState);
         // Remove the loading screen and display video
         document.getElementById("ui-local").style.display = "none";
-        // ISSUE: CAMERA NOT DISPLAYING ON LOAD
-        // Also a problem here for me: https://daily-co.github.io/daily-js/demo/demo-css-grid.html
+
         // Display Leave Call option
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
         };
-        // Add raisingHand status to handState
-        raisingHand = false;
-        handState[e.participants.local.session_id] = raisingHand;
-        console.log(handState);
-        // See accurate list of other participants and whether their hands are raised
       }
 
-      async function updateParticipantList(e) {
+      async function newParticipant(e) {
+        // Old users receive message that new user
         console.log(e);
-        // Add new participant name to the list
-        let participants = callFrame.participants();
+
+        participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
-
+        // For every participant on the call that is not the one who just joined
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
-            return; // We set the local display in the HTML
-          } else {
-            let participant = participants[p];
-            wrapper.innerHTML += `
+            return;
+          }
+          let participant = participants[p];
+          wrapper.innerHTML += `
         <div class="ui-participant-guest">
             <p>${participant.user_name || "Guest"}</p>
             <img id=${
               participant.session_id
             } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
-          
-          if (handState[participant.session_id] === true) {
-            document.getElementById(`${participant.session_id}`).style.display =
-              "block";
+
+          if (p !== e.participant.session_id) {
+            // Send everyone a message about the participant's hand state
+            update = {
+              status: handState[participant.session_id],
+            };
+            setTimeout(() => {
+              callFrame.sendAppMessage(update, "*");
+            }, 5000);
           }
-        }});
+        });
       }
 
       async function updateHandState(e) {
-        console.log(e);
+        // console.log(e);
+        // console.log(handState);
         let id = e.fromId;
         let status = e.data.status;
         handState[id] = status;
-        updateParticipantList(); 
+        if (handState[id] === true) {
+          document.getElementById(`${id}`).style.display = "block";
+        }
       }
     </script>
   </body>
