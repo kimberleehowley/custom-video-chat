@@ -1,34 +1,36 @@
-# 🤚 Raise a virtual hand on custom Daily-co video chats
+# 🤚 Raise a virtual hand on custom Daily.co video chats
 If you've found your way to this post, you might've run into the same problem I did. Maybe you: 
 
-* Teach students in an online classroom, and need a way for them to let you know when they have something to say. 
-* Manage public meetings for city supervisors, and want to find an inclusive way to allow for public comment. 
+* Teach students in an online classroom, and need a way for them to let you know when they have something to say without talking over each other. 
+* Manage public meetings for city supervisors, and want to find a nondisruptive, organized way to allow for public comments. 
 * Just want your family catch-up chats to have a little more order. 
 
 In any of these (and many other!) situations, adding a tool to video chats that lets participants raise their hands, and that lets the moderator see everyone waiting to speak, can come in...handy. 
 
 <div align="center">
-<img src="https://media.giphy.com/media/3o6gE2U81aTVI52TaU/giphy.gif" alt="Cat slapping face"/> 
+<img src="https://media.giphy.com/media/xT0GqtpF1NWd9VbstO/giphy.gif" alt="Cat slapping face"/> 
 </div>
 
 
 This post will walk you through how to use the [Daily.co API](https://docs.daily.co/docs/reference-docs) to implement a Raise Your Hand feature on a custom video chat embedded in your website. 
-## How it will work 
-We'll wire a website up to the [Daily.co API](https://docs.daily.co/docs/reference-docs), which does some under the hood magic to add video chats to any app or site in minutes. We'll add some event listeners to notify us about specific actions (like when a new user joins a call) and respond accordingly, [toggling styles and icons](https://www.w3schools.com/jsref/met_document_getelementbyid.asp) based on those events. 
+## How this will work 
+We'll wire a website up to the [Daily.co API](https://docs.daily.co/docs/reference-docs), which does some under the hood magic to add video chats to any app or site in minutes. We'll listen for specific Daily.co call events (like when a new user joins) and execute custom callback functions in response. 
 
-To set this all up, you'll want to have a Daily-js account (sign up for one [here](https://dashboard.daily.co/)). I'll assume you already have a website up and running that you want to add this to, but, if you don't, you can fork one of [Daily's demos on Github](https://github.com/daily-co/daily-demos), or get some ideas for setting one up over at [Dev.to](https://dev.to/gaelthomas/how-to-deploy-a-static-website-for-free-in-only-3-minutes-with-google-drive-254c).
+To set this all up, you'll want to have a Daily-js account (sign up for one [here](https://dashboard.daily.co/)). I'll assume you already have a website in mind to add this feature to, but, if you don't, you can fork one of [Daily.co's demos on Github](https://github.com/daily-co/daily-demos), or get some ideas for building a website over on [Dev.to](https://dev.to/gaelthomas/how-to-deploy-a-static-website-for-free-in-only-3-minutes-with-google-drive-254c).
 
-If you'd rather head straight to code, you can check out the [full demo repository](https://github.com/kimberleejohnson/custom-video-call). 
+If you'd rather head straight to the code, you can check out the [full demo repository](https://github.com/kimberleejohnson/custom-video-call). 
 
-![Screenshot of video call with two hands raised](../../../images/daily-demo/daily-demo-cropped.png)
+Or, if you'd rather see the demo live in action, head over to [Netlify](https://daily-chat-raise-your-hand.netlify.app/). 
 
-## How to build it 
+![Screenshot of the site in action](./icon-assets/daily-demo-cropped.png)
+
+## How to build this 
 ### Connect to Daily.co 
-In the head of your the html where you'll host the call, add @daily-co as a script. 
+In the head of the html page where you'll host the call, add the @daily-co script tag. 
 
-Next, in the `<body>` tag, add an onload function to start the call as soon as someone visits the page, `onload="startCall()"`. We'll write that in a second, once the iframe where the Daily.co call will load is in place in the body. The top of your html page should now look something like this: 
+Next, inside the `<body>` tag, add an onload function to start the call as soon as someone visits the page: `onload="startCall()"`. We'll write that function soom, but first add the iframe where the Daily.co call will load within the body of the page, making sure it has an id tag. The top of your file should now look something like this: 
 
-`gist:kimberleejohnson/68a947f5043174bc42bd6c02374aa67d#index.html`
+![](https://gist.github.com/kimberleejohnson/68a947f5043174bc42bd6c02374aa67d)
 
 With that all loaded, we can create a `<script></script>` tag in our body to work with the Daily.co API. I decided to use a tag instead of importing a file to optimize for faster page loading, but you can also import a script if you prefer. 
 
