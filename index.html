@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Video call</title>
+    <title>Video chat</title>
     <script src="https://unpkg.com/@daily-co/daily-js"></script>
     <link rel="stylesheet" href="styles/page-styles.css" />
   </head>
@@ -70,9 +70,9 @@
 
         callFrame
           .on("joined-meeting", joinedCall)
-          .on("participant-joined", newParticipant)
+          .on("participant-joined", updateParticipantList)
           .on("left-meeting", leftCall)
-          .on("participant-left", leftParticipant)
+          .on("participant-left", updateParticipantList)
           .on("app-message", updateHandState);
         await callFrame.join({
           url: room.url,
@@ -86,12 +86,10 @@
           // Change the user's display
           document.getElementById("handraise-label").innerHTML = "Lower hand";
           document.getElementById("local-hand").style.display = "block";
-          // Update styling to a camera overlay
         } else {
           raisingHand = false;
           document.getElementById("handraise-label").innerHTML = "Raise hand";
           document.getElementById("local-hand").style.display = "none";
-          // PLACEHOLDER: Remove camera overlay styling
         }
         // Send a message sharing this state with all callers
         update = {
@@ -100,27 +98,25 @@
         callFrame.sendAppMessage(update, "*");
       }
 
-      async function joinedCall(e) {
+      async function joinedCall() {
         // Remove the loading screen, display video 
         document.getElementById("ui-local").style.display = "none";
-        // Display the Join Call option
+        // Display the Leave Call option
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
         };
       }
 
-      async function newParticipant(e) {
-        // Old users receive message that new user
-        console.log(e);
-
+      async function updateParticipantList(e) {
+        // Get all the participants on the call 
         participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
-
+        // Loop through participants, adding their names to the list
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
-            return;
+            return; // We exit out here because "You" is already added for the local user
           }
           let participant = participants[p];
           wrapper.innerHTML += `
@@ -131,7 +127,7 @@
             } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
 
-          // For every participant on the call that is not the one who just joined
+          // For every participant on the call that is not the one who just joined or left 
           if (p !== e.participant.session_id) {
             // Send everyone a message about the participant's hand state
             update = {
@@ -161,11 +157,7 @@
         };
         // Clear the participants' list locally
         document.getElementById("ui-participant-local").style.display = "none"; 
-        newParticipant(e)
-      }
-
-      async function leftParticipant(e) {
-        newParticipant(e);  
+        updateParticipantList(e)
       }
     </script>
   </body>
