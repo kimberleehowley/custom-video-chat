@@ -11,6 +11,7 @@ In any of these (and many other!) situations, adding a tool to video chats that 
 <img src="https://media.giphy.com/media/3o6gE2U81aTVI52TaU/giphy.gif" alt="Cat slapping face"/> 
 </div>
 
+
 This post will walk you through how to use the [Daily.co API](https://docs.daily.co/docs/reference-docs) to implement a Raise Your Hand feature on a custom video chat embedded in your website. 
 ## How it will work 
 We'll wire a website up to the [Daily.co API](https://docs.daily.co/docs/reference-docs), which does some under the hood magic to add video chats to any app or site in minutes. We'll add some event listeners to notify us about specific actions (like when a new user joins a call) and respond accordingly, [toggling styles and icons](https://www.w3schools.com/jsref/met_document_getelementbyid.asp) based on those events. 
