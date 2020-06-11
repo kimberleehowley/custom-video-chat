@@ -30,63 +30,63 @@ In the head of the html page where you'll host the call, add the @daily-co scrip
 
 Next, inside the `<body>` tag, add an onload function to start the call as soon as someone visits the page: `onload="startCall()"`. We'll write that function soom, but first add the iframe where the Daily.co call will load within the body of the page, making sure it has an id tag. The top of your file should now look something like this: 
 
-<script src="https://gist.github.com/kimberleejohnson/68a947f5043174bc42bd6c02374aa67d.js"></script>
+![Head of html file](./gists/script_0.png)
 
-With that all loaded, we can create a `<script></script>` tag in our body to work with the Daily.co API. I decided to use a tag instead of importing a file to optimize for faster page loading, but you can also import a script if you prefer. 
+With that all set, we can create a `<script></script>` tag in our body to work with the Daily.co API. A tag within my html file worked faster for me locally than importing a separating .js script, but you could go that route too. 
 
-First, we'll initialize two variables: a boolean to track whether or not a hand is raised `raisingHand`, and an object to pair that status with a user's session id `handState.` 
+First, we'll initialize two variables: a boolean to track whether or not a hand is raised `raisingHand`, and an object to pair that status with a user's session_id `handState.` 
 
-With those ready globally, we can setup `startCall()`. In this function we'll need to create the DailyIframe, and point it to the appropriate room to join. For demo purposes, I'm hard-coding a url from my [Daily.co dashboard](https://dashboard.daily.co/), but for full production-ready web applications, you'll want to [create a unique room](https://www.daily.co/blog/video-call-api-tutorial-the-rooms-family-of-endpoints). 
+With those ready, we can setup `startCall()`. In this function, we'll need to create the DailyIframe, and point it to the appropriate room to join. I hard-coded a url from my [Daily.co dashboard](https://dashboard.daily.co/) to get this demo running quickly, but for full production-ready chats, you'll want to [create a unique room](https://www.daily.co/blog/video-call-api-tutorial-the-rooms-family-of-endpoints). 
 
-After establishing the room link, we call the Daily.co Api to create the iframe, and to put it on our #call-frame element. I added a property to use Daily.co's [custom layout functionality](https://www.daily.co/blog/using-css-grid-to-create-custom-api-video-call-layouts), but that's optional. 
+We can now call the Daily.co API to create the iframe within our #call-frame element (that's why we needed an id). I added a property to use Daily.co's [custom layout functionality](https://www.daily.co/blog/using-css-grid-to-create-custom-api-video-call-layouts)too, but that's optional. 
 
 With the callFrame initialized, we then tell our function to join the call with `callFrame.join()`. 
 
-`gist:kimberleejohnson/bd797acb5194da0b458c11599e2c138b#initialize-callframe.html`
+![Initializing Daily.co call](./gists/script_1.png)
 
-With that, you should be able to join a call on loading the page. Now we can add the specifics. 
+You should be able to now refresh the page and enter a call. Now to customizing. 
 
 ### React when a user joins a call 
 The [Daily.co API](https://docs.daily.co/reference#events) gives us some events we can listen for and react to with custom functions ([callbacks](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function)).
 
-We'll start with `joined-meeting`. When a user joins a meeting, we want to: remove their loading screen, and swap the "Join Call" option for "Leave Call". We can do all of that in a `joinedCall()` function we pass to `joined-meeting`. 
+We'll start with `joined-meeting`. When a user joins a meeting, we want to remove their loading screen, and to swap the "Join Call" option for "Leave Call". We can do all of that in a `joinedCall()` function we pass to `joined-meeting`. 
 
-`gist:kimberleejohnson/fedf229c9b32bdade5382ed21229892d#joinedCall.html`
+![Scripts for when user joins meeting](./gists/script_2.png)
 
 ### Let a user raise their hand
-I added a Raise Your Hand option to my user's controller menu, and connected that to `onClick=toggleHand()` function. 
+I added a Raise Your Hand option to my user's controller list, alongside the microphone and video icons, and connected that hand to an `onclick=toggleHand()` function. 
 
-The function uses `document.getElementById()` to toggle styling based on a user's click, and set that `raisingHand` boolean to match.
+The function uses `document.getElementById()` to toggle styling based on a user's click, and to then set the `raisingHand` boolean based on whether the hand is raised.
 
-But, that click just controls a user's own view. To make sure the change they make is visible to all future callers, we need to call Daily.co's `callFrame.sendAppMessage()` to let everyone else know about the change. 
+But, that click just controls a user's _own_, or "local" view. To make sure the change they make is visible to all future callers, we need to call Daily.co's `callFrame.sendAppMessage()` to let everyone else know about the change. 
 
-`gist:kimberleejohnson/ed4ea174790b8653da851866b8c92e4e#toggleHandState.html`
+![Scripts for when user joins meeting](./gists/script_3.png)
 
-Since [the message won't last forever](https://docs.daily.co/reference#%EF%B8%8F-sendappmessage), we want to take advantage of the `app-message` event listener Daily.co gives us to do something with the message and update the hand list. We do that by manipulating our `handState` object in another callback function. I'm calling this one `updateHandState()`.  
+To do something with that information, we'll use the Daily.co `app-message` event, adding a callback function to update our `handState`. I'm calling this one `updateHandState(e)`.  
 
-`gist:kimberleejohnson/582b3d56842cebfa15afdf9982e5a980#updateHandState.html`
+![Scripts for updating handState](./gists/script_4.png) 
 
-Now, we're ready for other users to join the call. 
-
-### Update when more users join a call 
+### React when other users join the call 
 The `participant-joined` Daily.co event lets us know when another user joins the call. 
 
-When another user joins us, we need to do two main things: add their name to the guest list, and make sure they can see who else is already on the call and has their hand raised. A new user won't see any messages that were sent before they joined the call, so, when a participant joins, we need to tell every other user to send a new message about whether or not their hands are raised. 
+We need to do two main things when that happens: add their name to the guest list, and make sure they can see who else is already on the call and has their hand raised. A new user [won't see any messages that were sent before they joined the call](https://docs.daily.co/reference#%EF%B8%8F-sendappmessage). So, when a participant joins, we need to tell every other user on the call to send another message to everyone else about whether or not their hand is raised. 
 
-The `updateParticipantList(e)` function takes care of all that. It calls Daily.co's `callFrame.participants()` to get all the participants on the call, loop through them and add their .user_name or the placeholder "Guest" to the list. It also grabs each participant's .session_id to put as an id on the `<img>` tag. For the final step in the loop, for every participant on the call who is not the one who just joined (which we can tell from the event we passed in), we send a message to all the other callers with the appropriate handState, triggering `updateHandState(e)` to run again with the sent message. 
+Our `updateParticipantList(e)` calls Daily.co's `callFrame.participants()` to get all the participants on the call, loop through them and add their .user_name or the placeholder "Guest" to the participant list. It also grabs each participant's .session_id to put as an id on the `<img>` tag. As the last step in the loop, each participant on the call who is not the one who just joined (we get that information from the event `(e)` we passed in), sends a message to all the other callers with their handState. Since a message has been sent, our `updateHandState(e)` runs again. 
 
-`gist:kimberleejohnson/07ee2c40a725f813af21819cc44d2610#updateParticipantList.html`
+![Scripts for updating participant list](./gists/script_5.png)
 
-### Update when users leave the call 
-All good things (and video chats) must come to an end. When a user leaves a call, we need to reset their view to display the "Join Call" option again and remove the "Participants" display, including the names of other users. 
+### React when users leave the call 
+All good things (and video chats) must come to an end. When a user leaves a call, we need to reset their view to display the "Join Call" option, and to remove the list of participants. 
 
-When a user sees another user leave a call through the 'participant-left' event, we need to run `updateParticipantList(e)` again so that their name doesn't remain on the display once they've left.
+When a user sees another caller leave (on the `participant-left` event), we need to run `updateParticipantList(e)` again so that their name and handState gets removed from the list when they leave. 
+
+![Scripts for updating participant list when users leave](./gists/script_6.png)
 
 And, there you have it! Participants can now raise their hands during your video chat. 
 
-`gist:kimberleejohnson/29dca0babf98e7698a04f56242405677#leftCall.html`
-
-And, with that, participants can raise and lower their hands in your custom video chat. 
+<div align="center">
+<img src="https://media.giphy.com/media/3o7aTucH1E8PTkEe7S/giphy.gif" alt="Cat slapping face"/> 
+</div>
 
 ### Going further
-If you're planning on lots of participants in your call, with lots of hands raised, I recommend using a framework like React to manage all those hand statuses. Have a look at [Daily's React demo](https://www.daily.co/blog/building-a-custom-video-chat-app-with-react). And, if you're up for the challenge of getting Daily up on a Gatsby site, please give me a shout over at [@kimeejohnson](https://twitter.com/kimeejohnson). 
+If you're planning on lots of participants in your call, with lots of hands raised, I recommend using a framework like React to manage all that state. Have a look at [Daily's React demo](https://www.daily.co/blog/building-a-custom-video-chat-app-with-react). And, if you're up for the challenge of getting a Daily.co video chat up on a Gatsby site, please give me a shout at `hello@kimberlee.dev`.  
