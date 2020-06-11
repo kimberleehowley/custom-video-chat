@@ -8,7 +8,7 @@ If you've found your way to this post, you might've run into the same problem I 
 In any of these (and many other!) situations, adding a tool to video chats that lets participants raise their hands, and that lets the moderator see everyone waiting to speak, can come in...handy. 
 
 <div style="text-align:center">
-![Cat slapping face](https://media.giphy.com/media/3o6gE2U81aTVI52TaU/giphy.gif)
+<img src="https://media.giphy.com/media/3o6gE2U81aTVI52TaU/giphy.gif" alt="Cat slapping face"/> 
 </div>
 
 This post will walk you through how to use the [Daily.co API](https://docs.daily.co/docs/reference-docs) to implement a Raise Your Hand feature on a custom video chat embedded in your website. 
