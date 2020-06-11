@@ -30,7 +30,7 @@ In the head of the html page where you'll host the call, add the @daily-co scrip
 
 Next, inside the `<body>` tag, add an onload function to start the call as soon as someone visits the page: `onload="startCall()"`. We'll write that function soom, but first add the iframe where the Daily.co call will load within the body of the page, making sure it has an id tag. The top of your file should now look something like this: 
 
-![](https://gist.github.com/kimberleejohnson/68a947f5043174bc42bd6c02374aa67d)
+<script src="https://gist.github.com/kimberleejohnson/68a947f5043174bc42bd6c02374aa67d.js"></script>
 
 With that all loaded, we can create a `<script></script>` tag in our body to work with the Daily.co API. I decided to use a tag instead of importing a file to optimize for faster page loading, but you can also import a script if you prefer. 
 
