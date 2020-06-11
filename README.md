@@ -1,6 +1,8 @@
 # Raise a virtual hand on custom Daily-co video chats 
 This repository should help get you test out a custom[Daily.co](https://www.daily.co/) video chat embedded in a website, complete with a Raise Your Hand feature.
 
+Test out an already running demo at: [https://daily-chat-raise-your-hand.netlify.app/](https://daily-chat-raise-your-hand.netlify.app/). 
+
 ![Screenshot of the site in action](./icon-assets/daily-demo-cropped.png)
 
 If you're looking for more complete step-by-step instructions, you can find them [here in the repository](https://github.com/kimberleejohnson/custom-video-chat/blob/master/step-by-step.md), and also on [the blog]().  
