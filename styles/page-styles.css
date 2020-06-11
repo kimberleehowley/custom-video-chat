@@ -52,7 +52,7 @@ body {
 
 .ui-controller-control,
 .ui-participant-guest, 
-.ui-participant-local {
+#ui-participant-local {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1.25em; /** 20/16px **/

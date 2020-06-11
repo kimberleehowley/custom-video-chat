@@ -41,7 +41,7 @@
 
       <div id="ui-participant">
         <p>Participants</p>
-        <div class="ui-participant-local">
+        <div id="ui-participant-local">
           <em>You</em>
           <img
             id="local-hand"
@@ -56,7 +56,7 @@
     <script>
       let raisingHand;
 
-      let handState = {}; 
+      let handState = {};
 
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -71,6 +71,8 @@
         callFrame
           .on("joined-meeting", joinedCall)
           .on("participant-joined", newParticipant)
+          .on("left-meeting", leftCall)
+          .on("participant-left", leftParticipant)
           .on("app-message", updateHandState);
         await callFrame.join({
           url: room.url,
@@ -89,7 +91,7 @@
           raisingHand = false;
           document.getElementById("handraise-label").innerHTML = "Raise hand";
           document.getElementById("local-hand").style.display = "none";
-          // Remove camera overlay styling
+          // PLACEHOLDER: Remove camera overlay styling
         }
         // Send a message sharing this state with all callers
         update = {
@@ -99,10 +101,9 @@
       }
 
       async function joinedCall(e) {
-        // Remove the loading screen and display video
+        // Remove the loading screen, display video 
         document.getElementById("ui-local").style.display = "none";
-
-        // Display Leave Call option
+        // Display the Join Call option
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
           callFrame.leave();
@@ -116,7 +117,7 @@
         participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
-        
+
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
             return;
@@ -130,7 +131,7 @@
             } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
 
-        // For every participant on the call that is not the one who just joined
+          // For every participant on the call that is not the one who just joined
           if (p !== e.participant.session_id) {
             // Send everyone a message about the participant's hand state
             update = {
@@ -150,6 +151,21 @@
         if (handState[id] === true) {
           document.getElementById(`${id}`).style.display = "block";
         }
+      }
+
+      async function leftCall(e) {
+        // Display the Join Call option
+        document.getElementById("leave-call-label").innerHTML = "Join call";
+        document.getElementById("leave-call-div").onclick = () => {
+          callFrame.join();
+        };
+        // Clear the participants' list locally
+        document.getElementById("ui-participant-local").style.display = "none"; 
+        newParticipant(e)
+      }
+
+      async function leftParticipant(e) {
+        newParticipant(e);  
       }
     </script>
   </body>

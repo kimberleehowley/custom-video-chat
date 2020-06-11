@@ -21,11 +21,12 @@ To set this all up, you'll want to have a Daily-js account (sign up for one [her
 
 ### Connect to Daily.co and create a room 
 - Add line to head 
-- Create the startCall function. -- purposes of getting up quickly, I just wired url 
+- Initialize two variables: boolean to track unique handState, object to collect them all as we go 
+- Create the startCall function. -- purposes of getting up quickly, I just wired url. Be more secure than I am. 
 - Wire StartCall to body 
 - Should see style-less
 - I added custom styles using Daily.co's demo to get this up and running quickly 
-- Initialized an empty object. We'll come back to that later. 
+
 
 ### Create your event listeners for when a user joins a call 
 - Daily.co provides a few events that we can listen for 
@@ -45,5 +46,9 @@ To set this all up, you'll want to have a Daily-js account (sign up for one [her
 - Loop through callFrame.participants(), for every user not on the call, send another message
 - Which means handState() will be called to run again 
 
+### Saying goodbye 
+- Make sure similar hand state adjustment when a user leaves
+- Oh and call .destroy() 
+
 ### What's next? 
-And there you have it! For managing larger applications, with lots of hands raised, recommend using a tool like React. Have a look at [Daily's React demo](https://www.daily.co/blog/building-a-custom-video-chat-app-with-react). And, if you're up for the challenge of getting Daily up on a Gatsby site, give me a shout. 
+And there you have it! For managing larger applications, with lots of hands raised, recommend using a framework like React. Have a look at [Daily's React demo](https://www.daily.co/blog/building-a-custom-video-chat-app-with-react). And, if you're up for the challenge of getting Daily up on a Gatsby site, give me a shout. 
