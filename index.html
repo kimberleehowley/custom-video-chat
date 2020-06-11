@@ -119,7 +119,7 @@
         participants = callFrame.participants();
         let wrapper = document.getElementById("ui-participant-guests");
         wrapper.innerHTML = "";
-        // For every participant on the call that is not the one who just joined
+        
         Object.keys(participants).forEach((p) => {
           if (p === "local") {
             return;
@@ -133,6 +133,7 @@
             } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
 
+        // For every participant on the call that is not the one who just joined
           if (p !== e.participant.session_id) {
             // Send everyone a message about the participant's hand state
             update = {
@@ -140,7 +141,7 @@
             };
             setTimeout(() => {
               callFrame.sendAppMessage(update, "*");
-            }, 5000);
+            }, 3000);
           }
         });
       }
