@@ -56,8 +56,7 @@
     <script>
       let raisingHand;
 
-      // Empty JSON
-      let handState = {};
+      let handState = {}; 
 
       async function startCall() {
         // For demo purposes, I'm hard-coding the meeting room.
@@ -100,8 +99,6 @@
       }
 
       async function joinedCall(e) {
-        // console.log(e);
-        // console.log(handState);
         // Remove the loading screen and display video
         document.getElementById("ui-local").style.display = "none";
 
@@ -147,8 +144,6 @@
       }
 
       async function updateHandState(e) {
-        // console.log(e);
-        // console.log(handState);
         let id = e.fromId;
         let status = e.data.status;
         handState[id] = status;
