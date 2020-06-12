@@ -85,7 +85,7 @@ When a user sees another caller leave (on the `participant-left` event), we need
 And, there you have it! Participants can now raise their hands during your video chat. 
 
 <div align="center">
-<img src="https://media.giphy.com/media/3o7aTucH1E8PTkEe7S/giphy.gif" alt="Cat slapping face"/> 
+<img src="https://media.giphy.com/media/3o7aTucH1E8PTkEe7S/giphy.gif" alt="High School girls raising hands"/> 
 </div>
 
 ### Going further

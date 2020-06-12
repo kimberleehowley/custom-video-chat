@@ -111,6 +111,7 @@
        *  Toggles label display when a user joins
        */
       async function joinedCall() {
+        // Toggle functionality to make sure buttons only work on join 
         document.getElementById("ui-local").style.display = "none";
         document.getElementById("leave-call-label").innerHTML = "Leave call";
         document.getElementById("leave-call-div").onclick = () => {
@@ -142,6 +143,7 @@
         </div>`;
 
           // For every participant on the call that is not the one who just joined or left
+          // Local, not just everyone who didn't join 
           if (p !== e.participant.session_id) {
             // Send everyone a message about the participant's hand state
             update = {
@@ -165,6 +167,7 @@
         if (handState[id] === true) {
           document.getElementById(`${id}`).style.display = "block";
         }
+        // Add statement for other case 
       }
 
       /**
