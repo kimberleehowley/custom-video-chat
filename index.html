@@ -82,7 +82,12 @@
           url: room.url,
           cssFile: "./styles/callframe-styles.css",
         });
+
+        // Testing console.log
+      console.log(typeof callFrame); 
       }
+
+      
 
       /**
        *  Toggles the participant's hand status, and sends a message alerting other participants to the change
@@ -104,7 +109,12 @@
           status: raisingHand,
         };
         callFrame.sendAppMessage(update, "*");
+        // Testing typeof
+      console.log(typeof raisingHand); 
+      console.log(typeof update); 
       }
+
+      console.log(typeof(toggleHand))
 
       /**
        *  Removes the loading screen when a participant joins a call
