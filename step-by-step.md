@@ -43,7 +43,6 @@ Next, inside the `<body>` tag, add an onload function to start the call as soon 
   </body>
 </html> 
 ```
-![Head of html file](./icon-assets/gists/script_0.png)
 
 With that all set, we can create a `<script></script>` tag in our body to work with the Daily.co API. A tag within my html file worked faster for me locally than importing a separating .js script, but you could go that route too. 
 
@@ -55,7 +54,34 @@ We can now call the Daily.co API to create the iframe within our #call-frame ele
 
 With the callFrame initialized, we then tell our function to join the call with `callFrame.join()`. 
 
-![Initializing Daily.co call](./icon-assets/gists/script_1.png)
+```html 
+<html>
+  <!--  -->
+  <script>
+    let raisingHand;
+    let handState = {};
+    
+    async function startCall() {
+    // For demo purposes, I'm hard-coding the meeting room.
+    // This is NOT a best practice in production. 
+    // For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
+      room = { url: "https://your-account.daily.co/hello" };
+  
+      callFrame = window.DailyIframe.wrap(
+        document.getElementById("call-frame"),
+          { customLayout: true }
+      );
+      // Our event listeners will go here 
+      await callFrame.join({
+          url: room.url,
+          cssFile: "./styles/callframe-styles.css",
+        });
+    }
+  // More to come here!
+  </script>
+  <!--  -->
+</html>
+```
 
 You should be able to now refresh the page and enter a call. Now to customizing. 
 
@@ -64,7 +90,34 @@ The [Daily.co API](https://docs.daily.co/reference#events) gives us some events 
 
 We'll start with `joined-meeting`. When a user joins a meeting, we want to remove their loading screen, and to swap the "Join Call" option for "Leave Call". We can do all of that in a `joinedCall()` function we pass to `joined-meeting`. 
 
-![Scripts for when user joins meeting](./icon-assets/gists/script_2.png)
+```html
+<html>
+  <!--  -->
+  <script>
+    // ...Our variables are initialized here 
+    
+    async function startCall() {
+    // ...Here we set up our iFrame and joined 
+      callFrame
+          .on("joined-meeting", joinedCall)
+          // More event listeners will be added. 
+    // ...Here we joined the call 
+    }
+    
+    async function joinedCall() {
+        // Remove the loading screen, display video 
+        document.getElementById("ui-local").style.display = "none";
+        // Display the Leave Call option, instead of Join Call
+        document.getElementById("leave-call-label").innerHTML = "Leave call";
+        document.getElementById("leave-call-div").onclick = () => {
+          callFrame.leave();
+        };
+      }
+  // More to come here!
+  </script>
+  <!--  -->
+</html>
+```
 
 ### Let a user raise their hand
 I added a Raise Your Hand option to my user's controller list, alongside the microphone and video icons, and connected that hand to an `onclick=toggleHand()` function. 
@@ -73,11 +126,71 @@ The function uses `document.getElementById()` to toggle styling based on a user'
 
 But, that click just controls a user's _own_, or "local" view. To make sure the change they make is visible to all future callers, we need to call Daily.co's `callFrame.sendAppMessage()` to let everyone else know about the change. 
 
-![Scripts for when user joins meeting](./icon-assets/gists/script_3.png)
+```html
+<html>
+  <!--  head tag here -->
+  <body onload="startCall()">
+    <!--  iframe and other elements here -->
+    <div onclick="toggleHand()" class="ui-controller-control">
+      <p id="handraise-label">Raise hand</p>
+      <img src="./icon-assets/icon-raised-hand.png" alt="Hand icon" />
+    </div>
+    <!--  Additional html elements here -->
+  <script>
+    // ...Our variables, callFrame, and other functions are here 
+    async function toggleHand() {
+        if (!raisingHand) {
+          raisingHand = true;
+          // Change the user's display
+          document.getElementById("handraise-label").innerHTML = "Lower hand";
+          document.getElementById("local-hand").style.display = "block";
+        } else {
+          raisingHand = false;
+          document.getElementById("handraise-label").innerHTML = "Raise hand";
+          document.getElementById("local-hand").style.display = "none";
+        }
+        // Send a message sharing this state with all callers
+        update = {
+          status: raisingHand,
+        };
+        callFrame.sendAppMessage(update, "*");
+      }
+  // More to come here!
+  </script>
+  <!--  -->
+</html>
+```
 
 To do something with that information, we'll use the Daily.co `app-message` event, adding a callback function to update our `handState`. I'm calling this one `updateHandState(e)`.  
 
-![Scripts for updating handState](./icon-assets/gists/script_4.png) 
+```html
+<html>
+  <!--  -->
+  <script>
+    // ...Our variables are initialized here 
+    
+    async function startCall() {
+    // ...Here we set up our iFrame
+      callFrame
+          // Other event listeners here 
+          .on("app-message", updateHandState)
+          // Other event listeners here 
+    // ...Here we joined the call 
+    }
+    
+    async function updateHandState(e) {
+        let id = e.fromId;
+        let status = e.data.status;
+        handState[id] = status;
+        if (handState[id] === true) {
+          document.getElementById(`${id}`).style.display = "block";
+        }
+      }
+  // More to come here!
+  </script>
+  <!--  -->
+</html>
+``` 
 
 ### React when other users join the call 
 The `participant-joined` Daily.co event lets us know when another user joins the call. 
@@ -86,14 +199,93 @@ We need to do two main things when that happens: add their name to the guest lis
 
 Our `updateParticipantList(e)` calls Daily.co's `callFrame.participants()` to get all the participants on the call, loop through them and add their .user_name or the placeholder "Guest" to the participant list. It also grabs each participant's .session_id to put as an id on the `<img>` tag. As the last step in the loop, each participant on the call who is not the one who just joined (we get that information from the event `(e)` we passed in), sends a message to all the other callers with their handState. Since a message has been sent, our `updateHandState(e)` runs again. 
 
-![Scripts for updating participant list](./icon-assets/gists/script_5.png)
+```html
+<html>
+  <!--  -->
+  <script>
+    // ...Our variables are initialized here 
+    
+    async function startCall() {
+    // ...Here we set up our iFrame
+      callFrame
+          // Other event listeners here 
+          .on("participant-joined", updateParticipantList)
+          // Other event listeners here 
+    // ...Here we joined the call 
+    }
+    
+    async function updateParticipantList(e) {
+        // Get all the participants on the call 
+        participants = callFrame.participants();
+        let wrapper = document.getElementById("ui-participant-guests");
+        wrapper.innerHTML = "";
+        
+        // Loop through participants, adding their names to the list
+        Object.keys(participants).forEach((p) => {
+          if (p === "local") {
+            return; // We exit out here because "You" is already added for the local user
+          }
+          let participant = participants[p];
+          wrapper.innerHTML += `
+        <div class="ui-participant-guest">
+            <p>${participant.user_name || "Guest"}</p>
+            <img id=${
+              participant.session_id
+            } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
+        </div>`;
+
+          // For every participant on the call that is not the one who just joined or left 
+          if (p !== e.participant.session_id) {
+            // Send everyone a message about the participant's hand state
+            update = {
+              status: handState[participant.session_id],
+            };
+            setTimeout(() => {
+              callFrame.sendAppMessage(update, "*");
+            }, 3000);
+          }
+        });
+      }
+  // More to come here!
+  </script>
+  <!--  -->
+</html>
+```
 
 ### React when users leave the call 
 All good things (and video chats) must come to an end. When a user leaves a call, we need to reset their view to display the "Join Call" option, and to remove the list of participants. 
 
 When a user sees another caller leave (on the `participant-left` event), we need to run `updateParticipantList(e)` again so that their name and handState gets removed from the list when they leave. 
 
-![Scripts for updating participant list when users leave](./icon-assets/gists/script_6.png)
+```html
+<html>
+  <!--  -->
+  <script>
+    // ...Our variables are initialized here 
+    async function startCall() {
+    // ...Here we set up our iframe
+      callFrame
+          // Other event listeners here 
+          .on("left-meeting", leftCall)
+          .on("participant-left", updateParticipantList)
+          // Other event listeners here 
+    // ...Here we joined the call 
+    }
+    
+    async function leftCall(e) {
+        // Display the Join Call option
+        document.getElementById("leave-call-label").innerHTML = "Join call";
+        document.getElementById("leave-call-div").onclick = () => {
+          callFrame.join();
+        };
+        // Clear the participants' list locally
+        document.getElementById("ui-participant-local").style.display = "none"; 
+        updateParticipantList(e)
+      }
+  </script>
+  <!--  -->
+</html>
+```
 
 And, there you have it! Participants can now raise their hands during your video chat. 
 
