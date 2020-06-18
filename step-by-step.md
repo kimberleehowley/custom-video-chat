@@ -30,6 +30,19 @@ In the head of the html page where you'll host the call, add the @daily-co scrip
 
 Next, inside the `<body>` tag, add an onload function to start the call as soon as someone visits the page: `onload="startCall()"`. We'll write that function soom, but first add the iframe where the Daily.co call will load within the body of the page, making sure it has an id tag. The top of your file should now look something like this: 
 
+```html 
+<html>
+  <head>
+    <title>Video chat</title>
+    <script src="https://unpkg.com/@daily-co/daily-js"></script>
+    <link rel="stylesheet" href="styles/page-styles.css" />
+  </head>
+  <body onload="startCall()">
+    <iframe id="call-frame" allow="camera; microphone; autoplay"></iframe>
+    <!-- More to come here, including our script --> 
+  </body>
+</html> 
+```
 ![Head of html file](./icon-assets/gists/script_0.png)
 
 With that all set, we can create a `<script></script>` tag in our body to work with the Daily.co API. A tag within my html file worked faster for me locally than importing a separating .js script, but you could go that route too. 
