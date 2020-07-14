@@ -1,204 +1,178 @@
 <html>
-  <head>
-    <title>Video chat</title>
-    <script src="https://unpkg.com/@daily-co/daily-js"></script>
-    <link rel="stylesheet" href="styles/page-styles.css" />
-  </head>
-  <body onload="startCall()">
-    <iframe id="call-frame" allow="camera; microphone; autoplay"></iframe>
-    <div id="ui-container">
-      <div id="ui-local">
-        <p>Loading your video feed…</p>
-      </div>
-      <div id="ui-controller">
-        <div
-          onclick="callFrame.setLocalVideo(!callFrame.localVideo())"
-          class="ui-controller-control"
-        >
-          <p>Toggle camera</p>
-          <img src="./icon-assets/icon-camera.svg" alt="Toggle Camera On/Off" />
-        </div>
-        <div
-          onclick="callFrame.setLocalAudio(!callFrame.localAudio())"
-          class="ui-controller-control"
-        >
-          <p>Toggle microphone</p>
-          <img
-            src="./icon-assets/icon-microphone.svg"
-            alt="Toggle Microphone On/Off"
-          />
-        </div>
-        <div onclick="toggleHand()" class="ui-controller-control">
-          <p id="handraise-label">Raise hand</p>
-          <img src="./icon-assets/icon-raised-hand.png" alt="Hand icon" />
-        </div>
-        <div onclick="" class="ui-controller-control">
-          <p id="chat-label">Chat</p>
-          <img src="./icon-assets/icon-chat.png" alt="Chat icon" />
-        </div>
-        <hr />
-        <div id="leave-call-div" class="ui-controller-control">
-          <p id="leave-call-label" style="color: #ff3b30;"></p>
-          <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
-        </div>
-      </div>
 
-      <div id="ui-participant">
-        <p>Participants</p>
-        <div id="ui-participant-local">
-          <em>You</em>
-          <img
-            id="local-hand"
-            src="./icon-assets/icon-raised-hand.png"
-            alt="Hand icon"
-            style="display: none;"
-          />
-        </div>
-        <div id="ui-participant-guests"></div>
+<head>
+  <title>Video chat</title>
+  <script src="https://unpkg.com/@daily-co/daily-js"></script>
+  <link rel="stylesheet" href="styles/page-styles.css" />
+</head>
+
+<body onload="startCall()">
+  <iframe id="call-frame" allow="camera; microphone; autoplay"></iframe>
+  <div id="ui-container">
+    <div id="ui-local">
+      <p>Loading your video feed…</p>
+    </div>
+    <div id="ui-controller">
+      <div onclick="callFrame.setLocalVideo(!callFrame.localVideo())" class="ui-controller-control">
+        <p>Toggle camera</p>
+        <img src="./icon-assets/icon-camera.svg" alt="Toggle Camera On/Off" />
+      </div>
+      <div onclick="callFrame.setLocalAudio(!callFrame.localAudio())" class="ui-controller-control">
+        <p>Toggle microphone</p>
+        <img src="./icon-assets/icon-microphone.svg" alt="Toggle Microphone On/Off" />
+      </div>
+      <div onclick="toggleChat()" class="ui-controller-control">
+        <p id="chat-label">Chat</p>
+        <img src="./icon-assets/icon-chat.png" alt="Chat icon" />
+      </div>
+      <hr />
+      <div id="leave-call-div" class="ui-controller-control">
+        <p id="leave-call-label" style="color: #ff3b30;"></p>
+        <img src="./icon-assets/icon-leave.svg" alt="Leave call" />
       </div>
     </div>
-    <script>
-      let raisingHand;
 
-      let handState = {};
+    <div id="ui-participant">
+      <p>Participants</p>
+      <div id="ui-participant-local">
+        <em>You</em>
+      </div>
+      <div id="ui-participant-guests"></div>
+      <!--Set inline to display: none so does not load on call-->
+      <div id="ui-chat" style="display:none">
+        <!--Placeholder chat content-->
+        <div id="messages"></div>
+        <input id="chatbox" type="text">
+        <button id="sendMessageButton">Send</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    let displayChat;
 
-      /**
-       *  Initializes a Daily.co call and creates the iframe
-       *
-       */
-      async function startCall() {
-        // For demo purposes, I'm hard-coding the meeting room.
-        // This is NOT a best practice in production. For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
-        room = { url: "https://kimberlee.daily.co/hello" };
+    /**
+     *  Initializes a Daily.co call and creates the iframe
+     *
+     */
+    async function startCall() {
+      // For demo purposes, I'm hard-coding the meeting room.
+      // This is NOT a best practice in production. For more on creating rooms securely, head to: https://docs.daily.co/reference#rooms
+      room = { url: "https://kimberlee.daily.co/hello" };
 
-        callFrame = window.DailyIframe.wrap(
-          document.getElementById("call-frame"),
-          { customLayout: true }
-        );
+      callFrame = window.DailyIframe.wrap(
+        document.getElementById("call-frame"),
+        { customLayout: true }
+      );
 
-        callFrame
-          .on("joined-meeting", joinedCall)
-          .on("participant-joined", updateParticipantList)
-          .on("left-meeting", leftCall)
-          .on("participant-left", updateParticipantList)
-          .on("app-message", updateHandState);
-        await callFrame.join({
-          url: room.url,
-          cssFile: "./styles/callframe-styles.css",
-        });
+      callFrame
+        .on("joined-meeting", joinedCall)
+        .on("participant-joined", updateParticipantList)
+        .on("left-meeting", leftCall)
+        .on("participant-left", updateParticipantList)
+        .on("app-message", updateChat);
+      await callFrame.join({
+        url: room.url,
+        cssFile: "./styles/callframe-styles.css",
+      });
+    }
 
-        // Testing console.log
-      console.log(typeof callFrame); 
+    async function toggleChat() {
+      if (!displayChat) {
+        displayChat = true;
+        // Change user display 
+        document.getElementById("ui-chat").style.display = "flex";
+      } else {
+        displayChat = false;
+        document.getElementById("ui-chat").style.display = "none";
       }
+    }
 
-      
+    // Sends whatever user types in textbox to rest of chat 
+    let messages = document.getElementById("messages");
+    let chatbox = document.getElementById("chatbox");
+    let sendMessageButton = document.getElementById("sendMessageButton");
+    sendMessageButton.addEventListener("click", sendMessage)
 
-      /**
-       *  Toggles the participant's hand status, and sends a message alerting other participants to the change
-       *
-       */
-      async function toggleHand() {
-        if (!raisingHand) {
-          raisingHand = true;
-          // Change the user's display
-          document.getElementById("handraise-label").innerHTML = "Lower hand";
-          document.getElementById("local-hand").style.display = "block";
-        } else {
-          raisingHand = false;
-          document.getElementById("handraise-label").innerHTML = "Raise hand";
-          document.getElementById("local-hand").style.display = "none";
+    async function sendMessage() {
+      // Send the message locally 
+      let newMessage = document.createElement("p");
+      newMessage.innerHTML = chatbox.value;
+      messages.appendChild(newMessage);
+
+      // Also broadcast the message, so everyone on the call sees 
+      newMessage = {
+        message: chatbox.value
+      }
+      callFrame.sendAppMessage(newMessage, "*")
+      chatbox.value = "";
+    }
+
+    async function updateChat(e) {
+      let newMessage = document.createElement("p");
+      newMessage.innerHTML = e.data.message;
+      messages.appendChild(newMessage);
+    }
+
+    /**
+     *  Removes the loading screen when a participant joins a call
+     *  Toggles label display when a user joins
+     */
+    async function joinedCall() {
+      // Toggle functionality to make sure buttons only work on join 
+      document.getElementById("ui-local").style.display = "none";
+      document.getElementById("leave-call-label").innerHTML = "Leave call";
+      document.getElementById("leave-call-div").onclick = () => {
+        callFrame.leave();
+      };
+    }
+
+    /**
+     *  Updates participant list based on who is in a call and triggers the chat to send to whoever was not in the meeting
+     *  @param {Object} e is the event information Daily.co returns
+     */
+    async function updateParticipantList(e) {
+      // Get all the participants on the call
+      participants = callFrame.participants();
+      let wrapper = document.getElementById("ui-participant-guests");
+      wrapper.innerHTML = "";
+
+      // Loop through participants, adding their names to the list
+      Object.keys(participants).forEach((p) => {
+        if (p === "local") {
+          let chatHistory = document.getElementById("messages").querySelectorAll("p");
+          chatHistory.forEach((chat) => {
+            console.log(chat.innerHTML);
+            newMessage = { message: chat.innerHTML }
+            console.log(newMessage); 
+            setTimeout(() => {
+              callFrame.sendAppMessage(newMessage, e.participant.session_id)
+            }, 5000)
+          })
+          return; // "You" is already added for the local user
         }
-        // Send a message to update all users on the change
-        update = {
-          status: raisingHand,
-        };
-        callFrame.sendAppMessage(update, "*");
-        // Testing typeof
-      console.log(typeof raisingHand); 
-      console.log(typeof update); 
-      }
-
-      console.log(typeof(toggleHand))
-
-      /**
-       *  Removes the loading screen when a participant joins a call
-       *  Toggles label display when a user joins
-       */
-      async function joinedCall() {
-        // Toggle functionality to make sure buttons only work on join 
-        document.getElementById("ui-local").style.display = "none";
-        document.getElementById("leave-call-label").innerHTML = "Leave call";
-        document.getElementById("leave-call-div").onclick = () => {
-          callFrame.leave();
-        };
-      }
-
-      /**
-       *  Updates participant list based on who is in a call and who has their hand raised
-       *  @param {Object} e is the event information Daily.co returns
-       */
-      async function updateParticipantList(e) {
-        // Get all the participants on the call
-        participants = callFrame.participants();
-        let wrapper = document.getElementById("ui-participant-guests");
-        wrapper.innerHTML = "";
-        // Loop through participants, adding their names to the list
-        Object.keys(participants).forEach((p) => {
-          if (p === "local") {
-            return; // "You" is already added for the local user
-          }
-          let participant = participants[p];
-          wrapper.innerHTML += `
+        let participant = participants[p];
+        wrapper.innerHTML += `
         <div class="ui-participant-guest">
             <p>${participant.user_name || "Guest"}</p>
-            <img id=${
-              participant.session_id
-            } src="./icon-assets/icon-raised-hand.png" alt="Raised hand" style="display:none"/>
         </div>`;
+      });
+    }
 
-          // For every participant on the call that is not the one who just joined or left
-          // Local, not just everyone who didn't join 
-          if (p !== e.participant.session_id) {
-            // Send everyone a message about the participant's hand state
-            update = {
-              status: handState[participant.session_id],
-            };
-            setTimeout(() => {
-              callFrame.sendAppMessage(update, "*");
-            }, 5000);
-          }
-        });
-      }
-
-      /**
-       *  Receives a message from other participants, updates handState and display accordingly
-       *  @param {Object} e is the event information Daily.co returns
-       */
-      async function updateHandState(e) {
-        let id = e.fromId;
-        let status = e.data.status;
-        handState[id] = status;
-        if (handState[id] === true) {
-          document.getElementById(`${id}`).style.display = "block";
-        }
-        // Add statement for other case 
-      }
-
-      /**
-       *  Toggles display settings when a user leaves a call
-       * Calls updateParticipantList passing in the information about the user who left
-       *  @param {Object} e is the event information Daily.co returns
-       */
-      async function leftCall(e) {
-        // Display the Join Call option
-        document.getElementById("leave-call-label").innerHTML = "Join call";
-        document.getElementById("leave-call-div").onclick = () => {
-          callFrame.join();
-        };
-        // Clear the participants' list locally
-        document.getElementById("ui-participant-local").style.display = "none";
-        updateParticipantList(e);
-      }
-    </script>
-  </body>
+    /**
+     *  Toggles display settings when a user leaves a call
+     * Calls updateParticipantList passing in the information about the user who left
+     *  @param {Object} e is the event information Daily.co returns
+     */
+    async function leftCall(e) {
+      // Display the Join Call option
+      document.getElementById("leave-call-label").innerHTML = "Join call";
+      document.getElementById("leave-call-div").onclick = () => {
+        callFrame.join();
+      };
+      // Clear the participants' list locally
+      document.getElementById("ui-participant-local").style.display = "none";
+      updateParticipantList(e);
+    }
+  </script>
+</body>
 </html>
