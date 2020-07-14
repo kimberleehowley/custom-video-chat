@@ -94,9 +94,11 @@
     sendMessageButton.addEventListener("click", sendMessage)
 
     async function sendMessage() {
+      // Get the participants' user name, so you can send it with the message 
+      
       // Send the message locally 
       let newMessage = document.createElement("p");
-      newMessage.innerHTML = chatbox.value;
+      newMessage.innerHTML = `You: ${chatbox.value}`;
       messages.appendChild(newMessage);
 
       // Also broadcast the message, so everyone on the call sees 
@@ -108,8 +110,11 @@
     }
 
     async function updateChat(e) {
+      let participants = callFrame.participants();
+      let userName = participants[e.fromId].user_name
+      console.log(e); e.fromId
       let newMessage = document.createElement("p");
-      newMessage.innerHTML = e.data.message;
+      newMessage.innerHTML = `${participants[e.fromId].user_name || "Guest"}: ${e.data.message}`;
       messages.appendChild(newMessage);
     }
 
@@ -139,15 +144,6 @@
       // Loop through participants, adding their names to the list
       Object.keys(participants).forEach((p) => {
         if (p === "local") {
-          let chatHistory = document.getElementById("messages").querySelectorAll("p");
-          chatHistory.forEach((chat) => {
-            console.log(chat.innerHTML);
-            newMessage = { message: chat.innerHTML }
-            console.log(newMessage); 
-            setTimeout(() => {
-              callFrame.sendAppMessage(newMessage, e.participant.session_id)
-            }, 5000)
-          })
           return; // "You" is already added for the local user
         }
         let participant = participants[p];
